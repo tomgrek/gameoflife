@@ -10,7 +10,7 @@ BOARD_WIDTH = 100
 
 examples = torch.load('train.data.batch')
 
-trainloader = torch.utils.data.DataLoader(examples, batch_size=4,
+trainloader = torch.utils.data.DataLoader(examples, batch_size=8,
                                           shuffle=True, num_workers=1)
 
 cv2.namedWindow("game", cv2.WINDOW_NORMAL)
@@ -30,9 +30,8 @@ class GoL(torch.nn.Module):
 gol = GoL().cuda()
 
 criterion = torch.nn.MSELoss()
-optimizer = torch.optim.SGD(gol.parameters(), lr=0.001, momentum=0.9)
-prev_loss = 1e10
-for epoch in range(42):
+optimizer = torch.optim.Adam(gol.parameters(), lr=0.001)
+for epoch in range(32):
 
     running_loss = 0.0
     for i, data in enumerate(trainloader):
@@ -44,7 +43,7 @@ for epoch in range(42):
         optimizer.zero_grad()
 
         output_ = gol(input_)
-        loss = criterion(output_, target_) * 62 # loss on non-aliver is penalized more
+        loss = criterion(output_, target_) * 56 # loss on non-aliver is penalized more
         loss.backward()
         optimizer.step()
 
@@ -58,7 +57,6 @@ for epoch in range(42):
             cv2.imshow("game", img)
             q = cv2.waitKey(100)
         last_frame = data
-        prev_loss = loss.item()
 
 distrib = torch.distributions.Bernoulli(0.5)
 board = distrib.sample((BOARD_HEIGHT,BOARD_WIDTH)).view(1,1,BOARD_HEIGHT,BOARD_WIDTH)
