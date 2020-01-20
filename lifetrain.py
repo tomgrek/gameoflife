@@ -10,8 +10,6 @@ BOARD_WIDTH = 100
 
 examples = torch.load('train.data.batch')
 
-# TODO support bigger batches, will have to change
-# how the data is loaded.
 trainloader = torch.utils.data.DataLoader(examples, batch_size=4,
                                           shuffle=True, num_workers=1)
 
@@ -25,7 +23,6 @@ class GoL(torch.nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
-        #import ipdb; ipdb.set_trace()
         x = self.fc1(x.view(-1, BOARD_HEIGHT*BOARD_WIDTH))
         x = F.selu(x)
         return x.view(-1,1,BOARD_HEIGHT,BOARD_WIDTH)
@@ -35,13 +32,11 @@ gol = GoL().cuda()
 criterion = torch.nn.MSELoss()
 optimizer = torch.optim.SGD(gol.parameters(), lr=0.001, momentum=0.9)
 prev_loss = 1e10
-for epoch in range(42):  # loop over the dataset multiple times
+for epoch in range(42):
 
     running_loss = 0.0
-    #last_frame = None
     for i, data in enumerate(trainloader):
         last_frame, target_ = data
-        #import ipdb; ipdb.set_trace()
         target_ = target_.view(-1,1,BOARD_HEIGHT,BOARD_WIDTH).to(torch.float32).to('cuda')
         last_frame = last_frame.view(-1,1,BOARD_HEIGHT,BOARD_WIDTH).to(torch.float32).to('cuda')
         input_ = last_frame
@@ -50,16 +45,8 @@ for epoch in range(42):  # loop over the dataset multiple times
 
         output_ = gol(input_)
         loss = criterion(output_, target_) * 62 # loss on non-aliver is penalized more
-        if False: #data.sum() > 1.5 * last_frame.sum():
-            pass
-            # Because each restart of the training datagen creates a totally new board
-            # if the difference between the data and last_frame is > threshold, 
-            # just skip this frame.
-            # NOTE DOESNT WORK NOW WERE BATCHING/NOT REQUIRED
-        else:
-            #print(loss.item(), data.sum(), last_frame.sum())
-            loss.backward()
-            optimizer.step()
+        loss.backward()
+        optimizer.step()
 
         running_loss += loss.item()
         if i % 20 == 0:
