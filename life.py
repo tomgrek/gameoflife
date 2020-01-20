@@ -7,10 +7,10 @@ import torch.nn.functional as F
 
 from PIL import Image
 
-BOARD_HEIGHT = 10
-BOARD_WIDTH = 10
+BOARD_HEIGHT = 200
+BOARD_WIDTH = 200
 
-distrib = torch.distributions.Bernoulli(0.4)
+distrib = torch.distributions.Bernoulli(0.5)
 
 weights = torch.tensor([[1,1,1],[1,10,1],[1,1,1]]).view(1,1,3,3) 
 #board = torch.tensor([[0,0,0,0,0], [0,0,0,0,0],[0,1,1,1,0],[0,0,0,0,0],[0,0,0,0,0]]).view(1,1,5,5)
@@ -26,7 +26,7 @@ while True:
     img = Image.fromarray(newboard_array).convert('RGB')
     img = np.array(img)
     cv2.imshow("game", img)
-    q = cv2.waitKey(500)
+    q = cv2.waitKey(100)
     if q == 113: # 'q'
         cv2.destroyAllWindows()
         sys.exit(0)
