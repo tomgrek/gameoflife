@@ -9,7 +9,10 @@ for i, d in enumerate(data):
     if i == 0:
         last_frame = d
         continue
-    newdata.append((last_frame, d))
+    if abs(d.sum().item()) > 1.5 * abs(last_frame.sum().item()):
+        pass
+    else:
+        newdata.append((last_frame, d))
     last_frame = d
 
 torch.save(newdata, 'train.data.batch')

@@ -1,5 +1,4 @@
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import torch
@@ -8,16 +7,15 @@ import torch.nn.functional as F
 from PIL import Image
 
 BOARD_HEIGHT = 200
-BOARD_WIDTH = 200
+BOARD_WIDTH = 300
 
 distrib = torch.distributions.Bernoulli(0.5)
 
 weights = torch.tensor([[1,1,1],[1,10,1],[1,1,1]]).view(1,1,3,3) 
-#board = torch.tensor([[0,0,0,0,0], [0,0,0,0,0],[0,1,1,1,0],[0,0,0,0,0],[0,0,0,0,0]]).view(1,1,5,5)
 board = distrib.sample((BOARD_HEIGHT,BOARD_WIDTH)).view(1,1,BOARD_HEIGHT,BOARD_WIDTH)
 board = board.to(torch.int64)
 
-cv2.namedWindow("game", cv2.WINDOW_NORMAL) # WINDOW_AUTOSIZE doesn't have the numbers!
+cv2.namedWindow("game", cv2.WINDOW_NORMAL)
 
 while True:
     newboard = F.conv2d(board, weights, padding=1).view(BOARD_HEIGHT,BOARD_WIDTH)
